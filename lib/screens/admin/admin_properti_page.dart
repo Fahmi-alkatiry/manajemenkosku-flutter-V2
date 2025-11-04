@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/properti_provider.dart';
 import 'package:kosku_app/screens/tambah_properti_screen.dart'; // Akan kita buat
 import 'package:provider/provider.dart';
+import 'package:kosku_app/screens/admin/properti_detail_page.dart';
 
 class AdminPropertiPage extends StatefulWidget {
   const AdminPropertiPage({super.key});
@@ -23,9 +24,10 @@ class _AdminPropertiPageState extends State<AdminPropertiPage> {
         _isLoading = true;
       });
       // Panggil provider untuk fetch data dari API
-      Provider.of<PropertiProvider>(context, listen: false)
-          .fetchProperti()
-          .then((_) {
+      Provider.of<PropertiProvider>(
+        context,
+        listen: false,
+      ).fetchProperti().then((_) {
         setState(() {
           _isLoading = false;
         });
@@ -43,14 +45,13 @@ class _AdminPropertiPageState extends State<AdminPropertiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Manajemen Properti"),
-      ),
+      appBar: AppBar(title: const Text("Manajemen Properti")),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () => _refreshProperti(context),
-              child: Consumer<PropertiProvider>( // Dengarkan perubahan data
+              child: Consumer<PropertiProvider>(
+                // Dengarkan perubahan data
                 builder: (ctx, propertiData, _) {
                   if (propertiData.items.isEmpty) {
                     return const Center(
@@ -60,14 +61,27 @@ class _AdminPropertiPageState extends State<AdminPropertiPage> {
                     // Tampilkan daftar properti
                     return ListView.builder(
                       itemCount: propertiData.items.length,
-                      itemBuilder: (ctx, i) => ListTile(
-                        title: Text(propertiData.items[i].namaProperti),
-                        subtitle: Text(propertiData.items[i].alamat),
-                        leading: CircleAvatar(child: Text((i + 1).toString())),
-                        onTap: () {
-                          // TODO: Navigasi ke Halaman Detail Kamar
-                        },
-                      ),
+                      itemBuilder: (ctx, i) {
+                        final properti =
+                            propertiData.items[i]; // Ambil objek properti
+                        return ListTile(
+                          title: Text(propertiData.items[i].namaProperti),
+                          subtitle: Text(propertiData.items[i].alamat),
+                          leading: CircleAvatar(
+                            child: Text((i + 1).toString()),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                // Kirim data properti ke halaman detail
+                                builder: (ctx) =>
+                                    PropertiDetailPage(properti: properti),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     );
                   }
                 },

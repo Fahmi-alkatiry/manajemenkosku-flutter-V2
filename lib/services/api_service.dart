@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:kosku_app/models/properti.dart';
-
+import 'package:kosku_app/models/kamar.dart'; 
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
@@ -74,6 +74,51 @@ class ApiService {
       return Properti.fromJson(data);
     } else {
       throw Exception(data['message'] ?? 'Gagal membuat properti.');
+    }
+  }
+
+
+  Future<List<Kamar>> getKamarByProperti(String token, int propertiId) async {
+    final response = await http.get(
+      // Panggil endpoint kamar berdasarkan propertiId
+      Uri.parse('$_baseUrl/kamar/properti/$propertiId'), 
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token', // <-- Wajib ada token
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((data) => Kamar.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat daftar kamar');
+    }
+  }
+
+
+  Future<Kamar> createKamar(
+      String token, Map<String, dynamic> kamarData) async {
+    
+    final response = await http.post(
+      Uri.parse('$_baseUrl/kamar'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(kamarData),
+    );
+
+    if (response.body.isEmpty) {
+      throw Exception('Gagal: Server tidak merespons (Status: ${response.statusCode})');
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 201) { // 201 = Created
+      return Kamar.fromJson(data);
+    } else {
+      throw Exception(data['message'] ?? 'Gagal membuat kamar.');
     }
   }
 }
