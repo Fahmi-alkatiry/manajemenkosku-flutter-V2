@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosku_app/screens/admin/admin_properti_page.dart';
 import 'package:kosku_app/screens/profile_screen.dart';
+import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart'; // <-- 1. IMPORT
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -15,16 +16,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   // Daftar halaman sesuai rencana Anda
   static final List<Widget> _adminPages = <Widget>[
-    // 0: Dashboard
+ // 0: Dashboard
     const Center(child: Text('1. Dashboard Utama (WIP)')),
     // 1: Manajemen Properti
     const AdminPropertiPage(),
-    // 2: Pembuatan Kontrak (Kita skip dulu, krn ini alur)
-    // 3: Verifikasi Pembayaran
-    const Center(child: Text('4. Verifikasi Pembayaran (WIP)')),
-    // 4: Laporan
+    
+    // 2: Verifikasi Pembayaran
+    const AdminVerifikasiPage(), // <-- 2. GANTI PLACEHOLDER
+
+    // 3: Laporan
     const Center(child: Text('6. Laporan (WIP)')),
-    // 5: Profil
+    // 4: Profil
     const ProfileScreen(),
   ];
 

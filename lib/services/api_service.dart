@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:kosku_app/models/properti.dart';
 import 'package:kosku_app/models/kamar.dart'; 
 import 'package:kosku_app/models/user_simple.dart'; // <-- 1. IMPORT BARU
+import 'package:kosku_app/models/pembayaran.dart';
+import 'package:kosku_app/models/kontrak_simple.dart';
+
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
@@ -163,5 +166,82 @@ class ApiService {
       }
     }
     // Jika sukses (201), tidak perlu mengembalikan apa-apa
+  }
+
+  // 1. API UNTUK FORM: Ambil semua kontrak aktif
+  // (ASUMSI backend punya endpoint: GET /api/kontrak?status=AKTIF)
+  Future<List<KontrakSimple>> getAllActiveContracts(String token) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/kontrak?status=AKTIF'), // Endpoint baru
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((data) => KontrakSimple.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat daftar kontrak');
+    }
+  }
+
+  // 2. API UNTUK FORM: Buat tagihan baru
+  Future<Pembayaran> createTagihan(String token, Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/pembayaran'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+    if (response.statusCode == 201) {
+      return Pembayaran.fromJson(jsonDecode(response.body));
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal membuat tagihan');
+    }
+  }
+
+  // 3. API UNTUK TAB VERIFIKASI: Ambil tagihan pending
+  // (ASUMSI backend punya endpoint: GET /api/pembayaran?status=Pending)
+  Future<List<Pembayaran>> getPendingPayments(String token) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/pembayaran?status=Pending'), // Endpoint baru
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((data) => Pembayaran.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat tagihan pending');
+    }
+  }
+
+
+  Future<Pembayaran> konfirmasiPembayaran(
+      String token, int pembayaranId, String status) async {
+    
+    final response = await http.put(
+      Uri.parse('$_baseUrl/pembayaran/konfirmasi/$pembayaranId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'status': status, // Kirim 'Lunas' atau 'Ditolak'
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return Pembayaran.fromJson(jsonDecode(response.body));
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal konfirmasi pembayaran');
+    }
   }
 }
