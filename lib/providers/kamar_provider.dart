@@ -84,4 +84,52 @@ class KamarProvider extends ChangeNotifier {
       return false; // Gagal
     }
   }
+
+
+  Future<bool> createKontrak({
+    required int penyewaId,
+    required int kamarId,
+    required DateTime tanggalMulai,
+    required DateTime tanggalAkhir,
+    required double hargaDisepakati,
+  }) async {
+    if (_token == null) {
+      _errorMessage = "Sesi Anda berakhir. Silakan login ulang.";
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      final Map<String, dynamic> data = {
+        'penyewaId': penyewaId,
+        'kamarId': kamarId,
+        'tanggal_mulai_sewa': tanggalMulai.toIso8601String(), // Format ke ISO String
+        'tanggal_akhir_sewa': tanggalAkhir.toIso8601String(),
+        'harga_sewa_disepakati': hargaDisepakati,
+      };
+
+      await _apiService.createKontrak(_token!, data);
+      
+      // Jika sukses, refresh daftar kamar
+      // Ambil propertiId dari kamar pertama (asumsi semua kamar di list ini
+      // dari properti yg sama, waspada jika list kosong)
+      if (_kamarItems.isNotEmpty) {
+        await fetchKamar(_kamarItems.first.propertiId);
+      }
+      
+      _isLoading = false;
+      notifyListeners();
+      return true; // Sukses
+
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false; // Gagal
+    }
+  }
 }

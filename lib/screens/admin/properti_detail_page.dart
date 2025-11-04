@@ -4,6 +4,7 @@ import 'package:kosku_app/models/properti.dart';
 import 'package:kosku_app/providers/kamar_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:kosku_app/screens/admin/tambah_kamar_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/admin/tambah_kontrak_page.dart'; // <-- 1. IMPORT BARU
 
 class PropertiDetailPage extends StatefulWidget {
   // Terima data properti yang diklik
@@ -57,26 +58,47 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
                       child: Text("Belum ada kamar di properti ini."),
                     );
                   } else {
-                    return ListView.builder(
-                      itemCount: kamarData.kamarItems.length,
-                      itemBuilder: (ctx, i) {
-                        final kamar = kamarData.kamarItems[i];
-                        return ListTile(
-                          title: Text("Kamar ${kamar.nomorKamar}"),
-                          subtitle: Text(kamar.tipe),
-                          // Tampilkan status kamar
-                          trailing: Chip(
-                            label: Text(
-                              kamar.status,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            backgroundColor: kamar.status == 'Tersedia'
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                        );
-                      },
-                    );
+                   return ListView.builder(
+      itemCount: kamarData.kamarItems.length,
+      itemBuilder: (ctx, i) {
+        final kamar = kamarData.kamarItems[i];
+        bool isTersedia = kamar.status == 'Tersedia'; // Cek status
+
+        return ListTile(
+          title: Text("Kamar ${kamar.nomorKamar}"),
+          subtitle: Text(kamar.tipe),
+          trailing: Chip(
+            label: Text(
+              kamar.status,
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: isTersedia ? Colors.green : Colors.red,
+          ),
+          
+          // ===================================
+          // ==       TAMBAHKAN INI         ==
+          // ===================================
+          onTap: () {
+            if (isTersedia) {
+              // Jika Tersedia, buka halaman Buat Kontrak
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (ctx) => TambahKontrakPage(kamar: kamar),
+                ),
+              );
+            } else {
+              // Jika Ditempati, mungkin nanti tampilkan detail kontrak
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Kamar ${kamar.nomorKamar} sudah ditempati.')),
+              );
+            }
+          },
+          // ===================================
+
+        );
+      },
+    );
                   }
                 },
               ),

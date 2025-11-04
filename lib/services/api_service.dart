@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:kosku_app/models/properti.dart';
 import 'package:kosku_app/models/kamar.dart'; 
+import 'package:kosku_app/models/user_simple.dart'; // <-- 1. IMPORT BARU
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
@@ -120,5 +121,47 @@ class ApiService {
     } else {
       throw Exception(data['message'] ?? 'Gagal membuat kamar.');
     }
+  }
+
+  Future<List<UserSimple>> getUsersByRole(String token, String role) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user?role=$role'), // Panggil endpoint user
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((data) => UserSimple.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat daftar pengguna');
+    }
+  }
+
+  // 2. Membuat kontrak baru
+  Future<void> createKontrak(
+      String token, Map<String, dynamic> data) async {
+    
+    final response = await http.post(
+      Uri.parse('$_baseUrl/kontrak'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode != 201) { // 201 = Created
+      // Tangani error jika gagal
+      if (response.body.isNotEmpty) {
+        final errorData = jsonDecode(response.body);
+        throw Exception(errorData['message'] ?? 'Gagal membuat kontrak.');
+      } else {
+        throw Exception('Gagal membuat kontrak (Status: ${response.statusCode})');
+      }
+    }
+    // Jika sukses (201), tidak perlu mengembalikan apa-apa
   }
 }

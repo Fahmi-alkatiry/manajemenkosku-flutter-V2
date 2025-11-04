@@ -7,6 +7,8 @@ import 'package:kosku_app/screens/admin/admin_home_screen.dart';
 import 'package:kosku_app/screens/penyewa/penyewa_home_screen.dart';
 import 'package:kosku_app/providers/kamar_provider.dart'; // <-- 1. IMPORT BARU
 import 'package:provider/provider.dart';
+import 'package:kosku_app/providers/user_provider.dart'; // <-- 1. IMPORT BARU
+
 void main() {
   runApp(const MyApp());
 }
@@ -39,6 +41,13 @@ class MyApp extends StatelessWidget {
           create: (ctx) => KamarProvider(Provider.of<AuthProvider>(ctx, listen: false)),
           update: (ctx, auth, previous) => KamarProvider(auth),
         ),
+
+        // 4. Provider User (BARU, juga bergantung pada Auth)
+        ChangeNotifierProxyProvider<AuthProvider, UserProvider>(
+          create: (ctx) => UserProvider(Provider.of<AuthProvider>(ctx, listen: false)),
+          update: (ctx, auth, previous) => UserProvider(auth),
+        ),
+        
       ],
       // 'child'-nya adalah MaterialApp Anda
       child: MaterialApp(
