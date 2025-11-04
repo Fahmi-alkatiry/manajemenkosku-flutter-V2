@@ -5,11 +5,14 @@ import 'package:kosku_app/models/kamar.dart';
 import 'package:kosku_app/models/user_simple.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/models/pembayaran.dart';
 import 'package:kosku_app/models/kontrak_simple.dart';
+import 'package:image_picker/image_picker.dart'; // <-- 1. IMPORT BARU
+import 'package:http_parser/http_parser.dart'; // <-- 2. IMPORT BARU
 
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
-  final String _baseUrl = "http://192.168.100.140:5000/api";
+  //192.168.1.21
+  final String _baseUrl = "http://192.168.1.21:5000/api";
 
  // Fungsi login mengembalikan Map (token + data user)
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -244,4 +247,121 @@ class ApiService {
       throw Exception(error['message'] ?? 'Gagal konfirmasi pembayaran');
     }
   }
+
+
+  Future<List<Pembayaran>> getMyPayments(String token) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/pembayaran/saya'), // Endpoint /saya
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      // Model Pembayaran kita sudah di-setup untuk mengambil data relasi
+      return jsonData.map((data) => Pembayaran.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat riwayat pembayaran');
+    }
+  }
+
+  // ===================================
+  // ==  API BARU UNTUK UPLOAD BUKTI  ==
+  // ===================================
+
+  Future<void> uploadBuktiPembayaran(String token, int pembayaranId, XFile imageFile) async {
+    
+    // Siapkan request multipart
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$_baseUrl/upload/bukti/$pembayaranId'), // Panggil endpoint upload
+    );
+
+    // Tambahkan token ke header
+    request.headers['Authorization'] = 'Bearer $token';
+
+    // Tambahkan file gambar ke request
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'bukti_pembayaran', // Ini adalah NAMA FIELD di backend (Multer)
+        imageFile.path,
+        contentType: MediaType('image', imageFile.path.split('.').last), // Cth: 'image/jpeg'
+      ),
+    );
+
+    // Kirim request
+    var response = await request.send();
+
+    // Cek status respons
+    if (response.statusCode != 200) {
+      // Coba baca pesan error jika ada
+      final respBody = await response.stream.bytesToString();
+      try {
+        final errorData = jsonDecode(respBody);
+        throw Exception(errorData['message'] ?? 'Gagal upload bukti');
+      } catch (e) {
+        throw Exception('Gagal upload bukti (Status: ${response.statusCode})');
+      }
+    }
+    // Jika sukses (200), selesai.
+  }
+Future<Map<String, dynamic>> updateMyProfile(String token, Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/user/me'), // Endpoint PUT /user/me
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      // Backend mengembalikan { message: "...", data: {...} }
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal update profil');
+    }
+  }
+Future<Map<String, dynamic>> getMyProfile(String token) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user/me'), // Endpoint GET /user/me
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Backend mengembalikan data user (sudah tanpa password)
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal mengambil profil');
+    }
+  }
+
+  Future<void> changeMyPassword(String token, String newPassword) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/user/me'), // Endpoint PUT /user/me
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      // Backend kita (di controller user) sudah di-setup
+      // untuk menerima 'password' dan meng-hash-nya.
+      body: jsonEncode(<String, String>{
+        'password': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      // Tangani jika gagal
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal ganti password');
+    }
+    // Jika 200 OK, sukses
+  }
+
 }

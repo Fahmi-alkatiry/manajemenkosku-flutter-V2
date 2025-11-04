@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:kosku_app/screens/edit_profile_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/ganti_password_page.dart'; // <-- 1. IMPORT BARU
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -9,23 +11,27 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Profil Saya"),
-      ),
+      
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.edit),
             title: const Text("Edit Profil"),
             onTap: () {
-              // TODO: Navigasi ke halaman Edit Profil
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (ctx) => const EditProfilePage()),
+              );
             },
           ),
           ListTile(
             leading: const Icon(Icons.lock),
             title: const Text("Ganti Password"),
             onTap: () {
-              // TODO: Navigasi ke halaman Ganti Password
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (ctx) => const GantiPasswordPage()),
+              );
             },
           ),
           const Divider(),
