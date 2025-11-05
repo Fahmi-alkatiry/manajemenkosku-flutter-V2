@@ -45,7 +45,6 @@ class _AdminPropertiPageState extends State<AdminPropertiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Manajemen Properti")),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

@@ -1,33 +1,44 @@
 // lib/screens/admin/admin_home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:kosku_app/screens/admin/admin_properti_page.dart';
+import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart';
+import 'package:kosku_app/screens/admin/admin_penyewa_page.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/screens/profile_screen.dart';
-import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart'; // <-- 1. IMPORT
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
-
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  int _selectedIndex = 1; // Mulai dari Tab "Properti" (indeks 1)
+  int _selectedIndex = 1; // Mulai dari Tab "Properti"
 
-  // Daftar halaman sesuai rencana Anda
   static final List<Widget> _adminPages = <Widget>[
- // 0: Dashboard
+    // 0: Dashboard
     const Center(child: Text('1. Dashboard Utama (WIP)')),
     // 1: Manajemen Properti
     const AdminPropertiPage(),
-    
     // 2: Verifikasi Pembayaran
-    const AdminVerifikasiPage(), // <-- 2. GANTI PLACEHOLDER
+    const AdminVerifikasiPage(),
+    
+    // 3: Halaman Penyewa BARU
+    const AdminPenyewaPage(), // <-- 2. TAMBAHKAN HALAMAN DI SINI
 
-    // 3: Laporan
+    // 4: Laporan
     const Center(child: Text('6. Laporan (WIP)')),
-    // 4: Profil
+    // 5: Profil
     const ProfileScreen(),
+  ];
+
+  // Daftar judul untuk AppBar
+  static const List<String> _pageTitles = <String>[
+    'Dashboard',
+    'Manajemen Properti',
+    'Verifikasi Pembayaran',
+    'Manajemen Penyewa', // <-- JUDUL BARU
+    'Laporan',
+    'Profil Saya',
   ];
 
   void _onItemTapped(int index) {
@@ -39,9 +50,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _adminPages.elementAt(_selectedIndex), // Tampilkan halaman aktif
+      appBar: AppBar(
+        title: Text(_pageTitles[_selectedIndex]), // Judul dinamis
+      ),
+      body: _adminPages.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        // Rencana Anda ada 5 tab utama (Kontrak adalah alur, bukan tab)
+        // ===================================
+        // ==   UPDATE ITEMS DI SINI (ADA 6)  ==
+        // ===================================
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -55,6 +71,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             icon: Icon(Icons.check_circle),
             label: 'Verifikasi',
           ),
+          // --- ITEM BARU ---
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Penyewa',
+          ),
+          // -----------------
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: 'Laporan',
@@ -66,10 +88,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey, // Penting agar label terlihat
+        unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
-        showUnselectedLabels: true, // Tampilkan label walau tidak aktif
-        type: BottomNavigationBarType.fixed, // Agar 5 item muat
+        showUnselectedLabels: true, // Tampilkan label
+        type: BottomNavigationBarType.fixed, // WAJIB 'fixed' untuk > 3 item
       ),
     );
   }

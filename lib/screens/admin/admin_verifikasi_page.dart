@@ -52,7 +52,6 @@ class _AdminVerifikasiPageState extends State<AdminVerifikasiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Verifikasi Pembayaran")),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

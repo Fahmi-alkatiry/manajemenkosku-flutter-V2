@@ -7,12 +7,13 @@ import 'package:kosku_app/models/pembayaran.dart';
 import 'package:kosku_app/models/kontrak_simple.dart';
 import 'package:image_picker/image_picker.dart'; // <-- 1. IMPORT BARU
 import 'package:http_parser/http_parser.dart'; // <-- 2. IMPORT BARU
+import 'package:kosku_app/models/user_detail.dart';
 
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
   //192.168.1.21
-  final String _baseUrl = "http://192.168.1.21:5000/api";
+  final String _baseUrl = "http://192.168.100.140:5000/api";
 
  // Fungsi login mengembalikan Map (token + data user)
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -33,6 +34,34 @@ class ApiService {
     } else {
       final errorData = jsonDecode(response.body);
       throw Exception(errorData['message'] ?? 'Gagal login.');
+    }
+  }
+
+  Future<UserSimple> registerPenyewa(Map<String, dynamic> data) async {
+    
+    // Pastikan data role dikirim sebagai PENYEWA
+    data['role'] = 'PENYEWA';
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/register'), // Panggil endpoint register PUBLIK
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.body.isEmpty) {
+      throw Exception('Gagal mendaftar: Respons server kosong (Status: ${response.statusCode})');
+    }
+    
+    final responseData = jsonDecode(response.body);
+
+    if (response.statusCode == 201) {
+      // Backend mengembalikan 'data' user yang baru
+      return UserSimple.fromJson(responseData['data']);
+    } else {
+      // Tangkap error (misal: email sudah terdaftar)
+      throw Exception(responseData['message'] ?? 'Gagal mendaftarkan penyewa');
     }
   }
 
@@ -363,5 +392,24 @@ Future<Map<String, dynamic>> getMyProfile(String token) async {
     }
     // Jika 200 OK, sukses
   }
+
+
+  Future<UserDetail> getUserDetail(String token, int userId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user/$userId'), // Panggil endpoint /api/user/:id
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return UserDetail.fromJson(jsonDecode(response.body));
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal mengambil detail user');
+    }
+  }
+
 
 }
