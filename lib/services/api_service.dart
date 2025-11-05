@@ -412,4 +412,28 @@ Future<Map<String, dynamic>> getMyProfile(String token) async {
   }
 
 
+
+// 4. API UNTUK LAPORAN: Ambil pembayaran dengan filter status (opsional)
+  Future<List<Pembayaran>> getPayments(String token, {String? status}) async {
+    // Jika status null, ambil semua. Jika ada, tambahkan ?status=...
+    String url = '$_baseUrl/pembayaran';
+    if (status != null) {
+      url += '?status=$status';
+    }
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((data) => Pembayaran.fromJson(data)).toList();
+    } else {
+      throw Exception('Gagal memuat data pembayaran');
+    }
+  }
+
 }

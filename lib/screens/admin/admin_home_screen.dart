@@ -4,6 +4,7 @@ import 'package:kosku_app/screens/admin/admin_properti_page.dart';
 import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart';
 import 'package:kosku_app/screens/admin/admin_penyewa_page.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/screens/profile_screen.dart';
+import 'package:kosku_app/screens/admin/admin_laporan_page.dart'; // <-- 1. IMPORT
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -26,7 +27,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     const AdminPenyewaPage(), // <-- 2. TAMBAHKAN HALAMAN DI SINI
 
     // 4: Laporan
-    const Center(child: Text('6. Laporan (WIP)')),
+    const AdminLaporanPage(), // <-- 2. GANTI PLACEHOLDER
     // 5: Profil
     const ProfileScreen(),
   ];

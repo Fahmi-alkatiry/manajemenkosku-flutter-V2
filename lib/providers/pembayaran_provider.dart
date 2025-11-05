@@ -26,6 +26,9 @@ class PembayaranProvider extends ChangeNotifier {
 
   List<Pembayaran> _myPayments = [];
   List<Pembayaran> get myPayments => _myPayments;
+
+  List<Pembayaran> _reportPayments = [];
+  List<Pembayaran> get reportPayments => _reportPayments;
   
   // Ambil tagihan pending pertama (untuk Layar 1)
   Pembayaran? get tagihanAktif {
@@ -194,6 +197,23 @@ class PembayaranProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false; // Gagal
+    }
+  }
+
+
+  Future<void> fetchReportPayments({String? status}) async {
+    if (_token == null) return;
+    _isLoading = true;
+    notifyListeners();
+    try {
+      // Panggil API baru yang lebih umum
+      _reportPayments = await _apiService.getPayments(_token!, status: status);
+      _errorMessage = '';
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
