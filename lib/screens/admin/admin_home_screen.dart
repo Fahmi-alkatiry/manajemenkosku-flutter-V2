@@ -5,6 +5,7 @@ import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart';
 import 'package:kosku_app/screens/admin/admin_penyewa_page.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/screens/profile_screen.dart';
 import 'package:kosku_app/screens/admin/admin_laporan_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/admin/admin_dashboard_page.dart'; // <-- 1. IMPORT
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -17,7 +18,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   static final List<Widget> _adminPages = <Widget>[
     // 0: Dashboard
-    const Center(child: Text('1. Dashboard Utama (WIP)')),
+    const AdminDashboardPage(), // <-- 2. GANTI PLACEHOLDER
     // 1: Manajemen Properti
     const AdminPropertiPage(),
     // 2: Verifikasi Pembayaran

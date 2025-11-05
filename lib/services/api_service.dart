@@ -8,6 +8,7 @@ import 'package:kosku_app/models/kontrak_simple.dart';
 import 'package:image_picker/image_picker.dart'; // <-- 1. IMPORT BARU
 import 'package:http_parser/http_parser.dart'; // <-- 2. IMPORT BARU
 import 'package:kosku_app/models/user_detail.dart';
+import 'package:kosku_app/models/dashboard_stats.dart'; // <-- IMPORT BARU
 
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
@@ -435,5 +436,44 @@ Future<Map<String, dynamic>> getMyProfile(String token) async {
       throw Exception('Gagal memuat data pembayaran');
     }
   }
+
+  Future<DashboardStats> getDashboardStats(String token) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/dashboard/stats'), // Endpoint baru
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return DashboardStats.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Gagal memuat statistik dashboard');
+    }
+  }
+
+
+  Future<void> updateKontrakStatus(String token, int kontrakId, String status) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/kontrak/status/$kontrakId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({'status_kontrak': status}),
+    );
+
+    if (response.statusCode != 200) {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal update status kontrak');
+    }
+  }
+  
+  // Kita juga butuh cara untuk mendapatkan ID kontrak aktif dari sebuah kamar.
+  // Untuk sederhananya, kita bisa buat endpoint baru di backend, ATAU
+  // kita gunakan endpoint yang sudah ada jika memungkinkan.
+  // CARA TERMUDAH: Kita update 'getKamarByProperti' di backend untuk menyertakan info kontrak aktif.
+
 
 }

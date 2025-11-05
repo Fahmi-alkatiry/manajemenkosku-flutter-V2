@@ -9,6 +9,7 @@ import 'package:kosku_app/providers/kamar_provider.dart'; // <-- 1. IMPORT BARU
 import 'package:provider/provider.dart';
 import 'package:kosku_app/providers/user_provider.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/providers/pembayaran_provider.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/providers/dashboard_provider.dart'; // <-- IMPORT
 
 void main() {
   runApp(const MyApp());
@@ -53,6 +54,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthProvider, PembayaranProvider>(
           create: (ctx) => PembayaranProvider(Provider.of<AuthProvider>(ctx, listen: false)),
           update: (ctx, auth, previous) => PembayaranProvider(auth),
+        ),
+
+        ChangeNotifierProxyProvider<AuthProvider, DashboardProvider>(
+          create: (ctx) => DashboardProvider(Provider.of<AuthProvider>(ctx, listen: false)),
+          update: (ctx, auth, previous) => DashboardProvider(auth),
         ),
 
       ],

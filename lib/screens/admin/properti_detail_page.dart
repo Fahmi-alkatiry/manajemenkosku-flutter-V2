@@ -5,6 +5,7 @@ import 'package:kosku_app/providers/kamar_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:kosku_app/screens/admin/tambah_kamar_page.dart'; // <-- 1. IMPORT
 import 'package:kosku_app/screens/admin/tambah_kontrak_page.dart'; // <-- 1. IMPORT BARU
+import 'package:kosku_app/screens/admin/detail_kontrak_aktif_page.dart'; // <-- 1. IMPORT BARU
 
 class PropertiDetailPage extends StatefulWidget {
   // Terima data properti yang diklik
@@ -78,7 +79,7 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
           // ===================================
           // ==       TAMBAHKAN INI         ==
           // ===================================
-          onTap: () {
+          onTap: () async {
             if (isTersedia) {
               // Jika Tersedia, buka halaman Buat Kontrak
               Navigator.push(
@@ -87,10 +88,26 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
                   builder: (ctx) => TambahKontrakPage(kamar: kamar),
                 ),
               );
+            } else if (kamar.status == 'Ditempati' && kamar.kontrakAktifId != null) {
+              // ===================================
+              // ==       ALUR AKHIRI SEWA        ==
+              // ===================================
+              // Buka halaman Detail Kontrak Aktif
+              final perluRefresh = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (ctx) => DetailKontrakAktifPage(kamar: kamar),
+                ),
+              );
+              // Jika kembali dengan sinyal 'true', refresh daftar kamar
+              if (perluRefresh == true) {
+                _refreshKamar(context);
+              }
+              // ===================================
             } else {
-              // Jika Ditempati, mungkin nanti tampilkan detail kontrak
+              // Fallback jika status Ditempati tapi data kontrak tidak ada (seharusnya tidak terjadi)
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Kamar ${kamar.nomorKamar} sudah ditempati.')),
+                SnackBar(content: Text('Kamar ${kamar.nomorKamar} sedang tidak tersedia.')),
               );
             }
           },
