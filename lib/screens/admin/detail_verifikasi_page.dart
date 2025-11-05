@@ -75,7 +75,7 @@ class _DetailVerifikasiPageState extends State<DetailVerifikasiPage> {
                           // TODO: Gabungkan _baseUrl dengan path bukti
                           // (Kita asumsikan 'buktiPembayaran' adalah path, cth: /uploads/bukti/file.jpg)
                           // Anda perlu _baseUrl dari ApiService di sini
-                          "http://10.0.2.2:5000${tagihan.buktiPembayaran}", 
+                          "http://192.168.100.140:5000${tagihan.buktiPembayaran}", 
                           fit: BoxFit.contain,
                           loadingBuilder: (ctx, child, progress) {
                             return progress == null ? child : const Center(child: CircularProgressIndicator());

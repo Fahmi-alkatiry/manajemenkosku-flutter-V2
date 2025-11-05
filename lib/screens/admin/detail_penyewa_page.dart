@@ -5,6 +5,9 @@ import 'package:kosku_app/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // Untuk format tanggal
 import 'package:kosku_app/models/user_detail.dart';
+import 'package:image_picker/image_picker.dart'; // <-- IMPORT INI
+import 'package:kosku_app/services/api_service.dart'; // <-- IMPORT INI
+import 'package:kosku_app/providers/auth_provider.dart'; // <-- IMPORT INI
 
 class DetailPenyewaPage extends StatefulWidget {
   final UserSimple penyewa; // Terima data simpel dari halaman daftar
@@ -17,7 +20,31 @@ class DetailPenyewaPage extends StatefulWidget {
 
 class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
   // Ganti IP ini sesuai IP backend Anda
-  final String _baseUrl = "http://10.0.2.2:5000"; 
+  final String _baseUrl = "http://192.168.100.140:5000"; 
+
+
+  Future<void> _adminUploadKtp() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mengupload KTP...")));
+      
+      try {
+        final token = Provider.of<AuthProvider>(context, listen: false).token!;
+        // Panggil API dengan targetUserId
+        await ApiService().uploadKtp(token, image, targetUserId: widget.penyewa.id);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("KTP Berhasil diupload!"), backgroundColor: Colors.green));
+        // Refresh data halaman ini
+        Provider.of<UserProvider>(context, listen: false).fetchUserDetail(widget.penyewa.id);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -55,7 +82,7 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
           
           return ListView(
             padding: const EdgeInsets.all(16.0),
-            children: [
+           children: [
               // === Info Kontak ===
               Text("Informasi Kontak", style: Theme.of(context).textTheme.titleLarge),
               _buildInfoRow("Email:", user.email),
@@ -64,7 +91,19 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
               const Divider(height: 20),
 
               // === Info KTP ===
-              Text("Data KTP", style: Theme.of(context).textTheme.titleLarge),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Data KTP", style: Theme.of(context).textTheme.titleLarge),
+                  // TOMBOL UPLOAD UNTUK ADMIN
+                  TextButton.icon(
+                    onPressed: _adminUploadKtp,
+                    icon: const Icon(Icons.upload_file),
+                    label: const Text("Upload KTP"),
+                  ),
+                ],
+              ),
+              // --- BAGIAN INI HILANG DI KODE ANDA ---
               _buildInfoRow("NIK:", user.nik ?? '-'),
               const SizedBox(height: 10),
               Container(
@@ -74,11 +113,12 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
                 child: user.fotoKtp == null
                     ? const Center(child: Text("Foto KTP belum di-upload"))
                     : Image.network(
-                        "$_baseUrl${user.fotoKtp}", // Gabungkan URL
+                        "$_baseUrl${user.fotoKtp}",
                         fit: BoxFit.contain,
                         errorBuilder: (c, e, s) => const Center(child: Text("Gagal memuat KTP")),
                       ),
               ),
+              // --------------------------------------
               const Divider(height: 20),
 
               // === Riwayat Kontrak ===

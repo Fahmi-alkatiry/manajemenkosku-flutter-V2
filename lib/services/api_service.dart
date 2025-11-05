@@ -470,10 +470,31 @@ Future<Map<String, dynamic>> getMyProfile(String token) async {
     }
   }
   
-  // Kita juga butuh cara untuk mendapatkan ID kontrak aktif dari sebuah kamar.
-  // Untuk sederhananya, kita bisa buat endpoint baru di backend, ATAU
-  // kita gunakan endpoint yang sudah ada jika memungkinkan.
-  // CARA TERMUDAH: Kita update 'getKamarByProperti' di backend untuk menyertakan info kontrak aktif.
+Future<void> uploadKtp(String token, XFile imageFile, {int? targetUserId}) async {
+    // Jika targetUserId diisi, gunakan endpoint Admin. Jika null, gunakan endpoint biasa.
+    final String endpoint = targetUserId != null
+        ? '/upload/ktp/$targetUserId' // Endpoint Admin
+        : '/upload/ktp';              // Endpoint User Sendiri
 
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$_baseUrl$endpoint'),
+    );
 
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'foto_ktp', // Sesuai nama field di middleware Multer backend
+        imageFile.path,
+        contentType: MediaType('image', imageFile.path.split('.').last),
+      ),
+    );
+
+    var response = await request.send();
+
+    if (response.statusCode != 200) {
+      final respBody = await response.stream.bytesToString();
+      throw Exception('Gagal upload KTP: $respBody');
+    }
+  }
 }

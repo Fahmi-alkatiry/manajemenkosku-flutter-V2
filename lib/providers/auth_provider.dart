@@ -9,11 +9,14 @@ class UserProfile {
   final String? noHp;
   final String? alamat;
 
+  final String? fotoKtp; // TAMBAHKAN INI
+
   UserProfile({
     required this.nama,
     required this.email,
     this.noHp,
     this.alamat,
+    this.fotoKtp
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -22,6 +25,8 @@ class UserProfile {
       email: json['email'],
       noHp: json['no_hp'],
       alamat: json['alamat'],
+      fotoKtp: json['foto_ktp'], // TAMBAHKAN INI
+      
     );
   }
 }
@@ -104,7 +109,7 @@ class AuthProvider extends ChangeNotifier {
     if (_token == null) return;
     
     // Cegah fetch berulang jika data sudah ada
-    if (_userProfile != null) return; 
+    // if (_userProfile != null) return; 
 
     _isLoading = true;
     notifyListeners();
