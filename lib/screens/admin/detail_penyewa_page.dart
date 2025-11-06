@@ -20,28 +20,43 @@ class DetailPenyewaPage extends StatefulWidget {
 
 class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
   // Ganti IP ini sesuai IP backend Anda
-  final String _baseUrl = "http://192.168.100.140:5000"; 
-
+  final String _baseUrl = "http://192.168.100.140:5000";
 
   Future<void> _adminUploadKtp() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mengupload KTP...")));
-      
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Mengupload KTP...")));
+
       try {
         final token = Provider.of<AuthProvider>(context, listen: false).token!;
         // Panggil API dengan targetUserId
-        await ApiService().uploadKtp(token, image, targetUserId: widget.penyewa.id);
+        await ApiService().uploadKtp(
+          token,
+          image,
+          targetUserId: widget.penyewa.id,
+        );
 
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("KTP Berhasil diupload!"), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("KTP Berhasil diupload!"),
+            backgroundColor: Colors.green,
+          ),
+        );
         // Refresh data halaman ini
-        Provider.of<UserProvider>(context, listen: false).fetchUserDetail(widget.penyewa.id);
+        Provider.of<UserProvider>(
+          context,
+          listen: false,
+        ).fetchUserDetail(widget.penyewa.id);
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
       }
     }
   }
@@ -51,8 +66,10 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
     super.initState();
     // Panggil provider untuk ambil data lengkap
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false)
-          .fetchUserDetail(widget.penyewa.id);
+      Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).fetchUserDetail(widget.penyewa.id);
     });
   }
 
@@ -79,12 +96,15 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
           }
 
           final user = provider.selectedUserDetail!;
-          
+
           return ListView(
             padding: const EdgeInsets.all(16.0),
-           children: [
+            children: [
               // === Info Kontak ===
-              Text("Informasi Kontak", style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                "Informasi Kontak",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               _buildInfoRow("Email:", user.email),
               _buildInfoRow("No. HP:", user.noHp ?? '-'),
               _buildInfoRow("Alamat:", user.alamat ?? '-'),
@@ -94,7 +114,10 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Data KTP", style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    "Data KTP",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   // TOMBOL UPLOAD UNTUK ADMIN
                   TextButton.icon(
                     onPressed: _adminUploadKtp,
@@ -109,27 +132,33 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
               Container(
                 height: 200,
                 width: double.infinity,
-                decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
                 child: user.fotoKtp == null
                     ? const Center(child: Text("Foto KTP belum di-upload"))
                     : Image.network(
                         "$_baseUrl${user.fotoKtp}",
                         fit: BoxFit.contain,
-                        errorBuilder: (c, e, s) => const Center(child: Text("Gagal memuat KTP")),
+                        errorBuilder: (c, e, s) =>
+                            const Center(child: Text("Gagal memuat KTP")),
                       ),
               ),
               // --------------------------------------
               const Divider(height: 20),
 
               // === Riwayat Kontrak ===
-              Text("Riwayat Kontrak", style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                "Riwayat Kontrak",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               if (user.kontrak.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: Text("Belum ada riwayat kontrak."),
                 )
               else
-                ...user.kontrak.map((k) => _buildKontrakTile(k)).toList(),
+                ...user.kontrak.map((k) => _buildKontrakTile(k)),
             ],
           );
         },
@@ -144,8 +173,16 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 80, child: Text(label, style: const TextStyle(color: Colors.grey))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold))),
+          SizedBox(
+            width: 80,
+            child: Text(label, style: const TextStyle(color: Colors.grey)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
     );
@@ -159,10 +196,13 @@ class _DetailPenyewaPageState extends State<DetailPenyewaPage> {
       child: ListTile(
         title: Text("Kamar ${kontrak.nomorKamar}"),
         subtitle: Text(
-            "${formatTgl.format(kontrak.tanggalMulai)} - ${formatTgl.format(kontrak.tanggalAkhir)}"),
+          "${formatTgl.format(kontrak.tanggalMulai)} - ${formatTgl.format(kontrak.tanggalAkhir)}",
+        ),
         trailing: Chip(
           label: Text(kontrak.status, style: const TextStyle(fontSize: 12)),
-          backgroundColor: kontrak.status == 'AKTIF' ? Colors.green[100] : Colors.grey[200],
+          backgroundColor: kontrak.status == 'AKTIF'
+              ? Colors.green[100]
+              : Colors.grey[200],
         ),
       ),
     );

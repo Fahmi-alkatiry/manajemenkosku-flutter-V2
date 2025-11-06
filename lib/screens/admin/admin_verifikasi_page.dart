@@ -100,8 +100,8 @@ class _AdminVerifikasiPageState extends State<AdminVerifikasiPage> {
             MaterialPageRoute(builder: (ctx) => const TambahTagihanPage()),
           );
         },
-        child: const Icon(Icons.add),
         tooltip: "Buat Tagihan Baru",
+        child: const Icon(Icons.add),
       ),
     );
   }

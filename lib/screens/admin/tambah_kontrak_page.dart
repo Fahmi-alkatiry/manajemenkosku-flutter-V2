@@ -52,7 +52,9 @@ class _TambahKontrakPageState extends State<TambahKontrakPage> {
     final picked = await showDatePicker(
       context: context,
       initialDate: now,
-      firstDate: now.subtract(const Duration(days: 30)), // Bisa mulai dari 30 hari lalu
+      firstDate: now.subtract(
+        const Duration(days: 30),
+      ), // Bisa mulai dari 30 hari lalu
       lastDate: now.add(const Duration(days: 365 * 2)), // Maks 2 tahun
     );
     if (picked != null) {
@@ -73,11 +75,16 @@ class _TambahKontrakPageState extends State<TambahKontrakPage> {
     if (!_formKey.currentState!.validate()) return; // Gagal validasi
     if (_selectedPenyewa == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih penyewa'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Silakan pilih penyewa'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     final provider = Provider.of<KamarProvider>(context, listen: false);
     final success = await provider.createKontrak(
@@ -93,10 +100,15 @@ class _TambahKontrakPageState extends State<TambahKontrakPage> {
       Navigator.pop(context); // Kembali ke detail properti
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.errorMessage), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(provider.errorMessage),
+          backgroundColor: Colors.red,
+        ),
       );
     }
-    setState(() { _isLoading = false; });
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -118,8 +130,10 @@ class _TambahKontrakPageState extends State<TambahKontrakPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   return DropdownButtonFormField<UserSimple>(
-                    decoration: const InputDecoration(labelText: 'Pilih Penyewa'),
-                    value: _selectedPenyewa,
+                    decoration: const InputDecoration(
+                      labelText: 'Pilih Penyewa',
+                    ),
+                    initialValue: _selectedPenyewa, // ✅ pengganti 'value'
                     items: userProvider.penyewaList.map((penyewa) {
                       return DropdownMenuItem(
                         value: penyewa,
@@ -131,32 +145,42 @@ class _TambahKontrakPageState extends State<TambahKontrakPage> {
                         _selectedPenyewa = value;
                       });
                     },
-                    validator: (val) => (val == null) ? 'Wajib pilih penyewa' : null,
+                    validator: (val) =>
+                        (val == null) ? 'Wajib pilih penyewa' : null,
                   );
                 },
               ),
               // Form Tanggal
               TextFormField(
                 controller: _tglMulaiController,
-                decoration: const InputDecoration(labelText: 'Tanggal Mulai Sewa'),
+                decoration: const InputDecoration(
+                  labelText: 'Tanggal Mulai Sewa',
+                ),
                 readOnly: true, // Tidak bisa diketik manual
                 onTap: () => _pilihTanggal(context, true),
-                validator: (val) => (val == null || val.isEmpty) ? 'Wajib diisi' : null,
+                validator: (val) =>
+                    (val == null || val.isEmpty) ? 'Wajib diisi' : null,
               ),
               TextFormField(
                 controller: _tglAkhirController,
-                decoration: const InputDecoration(labelText: 'Tanggal Akhir Sewa'),
+                decoration: const InputDecoration(
+                  labelText: 'Tanggal Akhir Sewa',
+                ),
                 readOnly: true,
                 onTap: () => _pilihTanggal(context, false),
-                validator: (val) => (val == null || val.isEmpty) ? 'Wajib diisi' : null,
+                validator: (val) =>
+                    (val == null || val.isEmpty) ? 'Wajib diisi' : null,
               ),
               // Form Harga
               TextFormField(
                 controller: _hargaController,
-                decoration: const InputDecoration(labelText: "Harga Sewa Disepakati"),
+                decoration: const InputDecoration(
+                  labelText: "Harga Sewa Disepakati",
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (val) => (val == null || val.isEmpty) ? 'Wajib diisi' : null,
+                validator: (val) =>
+                    (val == null || val.isEmpty) ? 'Wajib diisi' : null,
               ),
               const SizedBox(height: 20),
               _isLoading

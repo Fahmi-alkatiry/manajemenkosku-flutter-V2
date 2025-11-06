@@ -72,9 +72,6 @@ class _DetailVerifikasiPageState extends State<DetailVerifikasiPage> {
                   child: tagihan.buktiPembayaran == null
                       ? const Center(child: Text("Penyewa belum upload bukti"))
                       : Image.network(
-                          // TODO: Gabungkan _baseUrl dengan path bukti
-                          // (Kita asumsikan 'buktiPembayaran' adalah path, cth: /uploads/bukti/file.jpg)
-                          // Anda perlu _baseUrl dari ApiService di sini
                           "http://192.168.100.140:5000${tagihan.buktiPembayaran}", 
                           fit: BoxFit.contain,
                           loadingBuilder: (ctx, child, progress) {

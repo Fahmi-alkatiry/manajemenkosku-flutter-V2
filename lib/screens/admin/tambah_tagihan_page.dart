@@ -82,7 +82,7 @@ class _TambahTagihanPageState extends State<TambahTagihanPage> {
                   }
                   return DropdownButtonFormField<KontrakSimple>(
                     decoration: const InputDecoration(labelText: 'Pilih Kontrak'),
-                    value: _selectedKontrak,
+                    initialValue: _selectedKontrak,
                     items: provider.activeContracts.map((kontrak) {
                       return DropdownMenuItem(
                         value: kontrak,
@@ -99,7 +99,7 @@ SizedBox(height: 10),
               // Dropdown Bulan
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Bulan'),
-                value: _selectedBulan,
+                initialValue: _selectedBulan,
                 items: _bulanList.map((bulan) {
                   return DropdownMenuItem(value: bulan, child: Text(bulan));
                 }).toList(),

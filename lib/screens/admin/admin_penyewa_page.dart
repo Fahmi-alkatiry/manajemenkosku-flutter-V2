@@ -85,8 +85,8 @@ class _AdminPenyewaPageState extends State<AdminPenyewaPage> {
             MaterialPageRoute(builder: (ctx) => const TambahPenyewaPage()),
           );
         },
-        child: const Icon(Icons.add),
         tooltip: "Tambah Penyewa",
+        child: const Icon(Icons.add),
       ),
     );
   }

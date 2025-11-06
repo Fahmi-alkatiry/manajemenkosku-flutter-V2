@@ -15,7 +15,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -24,19 +23,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Provider.of<AuthProvider>(context, listen: false).fetchMyProfile();
     });
   }
+
   // --- FUNGSI UPLOAD KTP SENDIRI ---
-  Future<void> _uploadMyKtp(BuildContext context) async {
+  Future<void> _uploadMyKtp() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null && mounted) {
+    if (!mounted) return; // Cek apakah widget masih hidup
+
+    if (image != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Mengupload KTP Anda...")));
 
       try {
         final token = Provider.of<AuthProvider>(context, listen: false).token!;
-        // Panggil API TANPA targetUserId (default ke diri sendiri)
         await ApiService().uploadKtp(token, image);
 
         if (!mounted) return;
@@ -46,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh data profil
+
         Provider.of<AuthProvider>(context, listen: false).fetchMyProfile();
       } catch (e) {
         if (!mounted) return;
@@ -63,7 +64,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     debugPrint(authProvider.userProfile.toString());
     // Base URL untuk menampilkan gambar KTP (jika sudah ada)
     const String baseUrl = "http://192.168.100.140:5000";
-
 
     // Tampilkan loading jika data profil belum siap
     if (authProvider.isLoading && authProvider.userProfile == null) {
@@ -182,8 +182,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pop(ctx); // Tutup dialog dulu
-                _uploadMyKtp(context); // Mulai proses upload
+                Navigator.pop(ctx); // Tutup dialog
+                _uploadMyKtp(); // Tidak perlu kirim context lagi
               },
               icon: const Icon(Icons.upload),
               label: const Text("Upload KTP Baru"),

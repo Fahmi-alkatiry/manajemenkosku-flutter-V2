@@ -10,7 +10,7 @@ import 'package:kosku_app/screens/admin/detail_kontrak_aktif_page.dart'; // <-- 
 class PropertiDetailPage extends StatefulWidget {
   // Terima data properti yang diklik
   final Properti properti;
-  
+
   const PropertiDetailPage({super.key, required this.properti});
 
   @override
@@ -24,13 +24,17 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      setState(() { _isLoading = true; });
+      setState(() {
+        _isLoading = true;
+      });
       // Panggil provider untuk ambil data kamar berdasarkan ID properti
       Provider.of<KamarProvider>(context, listen: false)
           .fetchKamar(widget.properti.id) // Gunakan ID dari properti
           .then((_) {
-        setState(() { _isLoading = false; });
-      });
+            setState(() {
+              _isLoading = false;
+            });
+          });
     }
     _isInit = false;
     super.didChangeDependencies();
@@ -38,89 +42,98 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
 
   // Fungsi refresh
   Future<void> _refreshKamar(BuildContext context) async {
-    await Provider.of<KamarProvider>(context, listen: false)
-        .fetchKamar(widget.properti.id);
+    await Provider.of<KamarProvider>(
+      context,
+      listen: false,
+    ).fetchKamar(widget.properti.id);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.properti.namaProperti),
-      ),
+      appBar: AppBar(title: Text(widget.properti.namaProperti)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () => _refreshKamar(context),
-              child: Consumer<KamarProvider>( // Dengarkan KamarProvider
+              child: Consumer<KamarProvider>(
+                // Dengarkan KamarProvider
                 builder: (ctx, kamarData, _) {
                   if (kamarData.kamarItems.isEmpty) {
                     return const Center(
                       child: Text("Belum ada kamar di properti ini."),
                     );
                   } else {
-                   return ListView.builder(
-      itemCount: kamarData.kamarItems.length,
-      itemBuilder: (ctx, i) {
-        final kamar = kamarData.kamarItems[i];
-        bool isTersedia = kamar.status == 'Tersedia'; // Cek status
+                    return ListView.builder(
+                      itemCount: kamarData.kamarItems.length,
+                      itemBuilder: (ctx, i) {
+                        final kamar = kamarData.kamarItems[i];
+                        bool isTersedia =
+                            kamar.status == 'Tersedia'; // Cek status
 
-        return ListTile(
-          title: Text("Kamar ${kamar.nomorKamar}"),
-          subtitle: Text(kamar.tipe),
-          trailing: Chip(
-            label: Text(
-              kamar.status,
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: isTersedia ? Colors.green : Colors.red,
-          ),
-          
-          // ===================================
-          // ==       TAMBAHKAN INI         ==
-          // ===================================
-          onTap: () async {
-            if (isTersedia) {
-              // Jika Tersedia, buka halaman Buat Kontrak
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (ctx) => TambahKontrakPage(kamar: kamar),
-                ),
-              );
-            } else if (kamar.status == 'Ditempati' && kamar.kontrakAktifId != null) {
-              // ===================================
-              // ==       ALUR AKHIRI SEWA        ==
-              // ===================================
-              // Buka halaman Detail Kontrak Aktif
-              final perluRefresh = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (ctx) => DetailKontrakAktifPage(kamar: kamar),
-                ),
-              );
-              // Jika kembali dengan sinyal 'true', refresh daftar kamar
-              if (perluRefresh == true) {
-                _refreshKamar(context);
-              }
-              // ===================================
-            } else {
-              // Fallback jika status Ditempati tapi data kontrak tidak ada (seharusnya tidak terjadi)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Kamar ${kamar.nomorKamar} sedang tidak tersedia.')),
-              );
-            }
-          },
-          // ===================================
+                        return ListTile(
+                          title: Text("Kamar ${kamar.nomorKamar}"),
+                          subtitle: Text(kamar.tipe),
+                          trailing: Chip(
+                            label: Text(
+                              kamar.status,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: isTersedia
+                                ? Colors.green
+                                : Colors.red,
+                          ),
 
-        );
-      },
-    );
+                          // ===================================
+                          // ==       TAMBAHKAN INI         ==
+                          // ===================================
+                          onTap: () async {
+                            if (isTersedia) {
+                              // Jika Tersedia, buka halaman Buat Kontrak
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) =>
+                                      TambahKontrakPage(kamar: kamar),
+                                ),
+                              );
+                            } else if (kamar.status == 'Ditempati' &&
+                                kamar.kontrakAktifId != null) {
+                              // === ALUR AKHIRI SEWA ===
+                              final perluRefresh = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) =>
+                                      DetailKontrakAktifPage(kamar: kamar),
+                                ),
+                              );
+
+                              // ⛔ Tambahkan ini untuk menghindari use_build_context_synchronously
+                              if (!mounted) return;
+
+                              if (perluRefresh == true) {
+                                _refreshKamar(context);
+                              }
+                            } else {
+                              // Fallback
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Kamar ${kamar.nomorKamar} sedang tidak tersedia.',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    );
                   }
                 },
               ),
             ),
-     floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigasi ke halaman Tambah Kamar
           Navigator.push(
@@ -131,8 +144,8 @@ class _PropertiDetailPageState extends State<PropertiDetailPage> {
             ),
           );
         },
-        child: const Icon(Icons.add),
         tooltip: "Tambah Kamar",
+        child: const Icon(Icons.add),
       ),
     );
   }

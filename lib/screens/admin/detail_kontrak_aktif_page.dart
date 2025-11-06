@@ -19,47 +19,60 @@ class _DetailKontrakAktifPageState extends State<DetailKontrakAktifPage> {
   final ApiService _apiService = ApiService();
 
   // Fungsi untuk mengakhiri kontrak
-  Future<void> _akhiriKontrak() async {
-    // Tampilkan dialog konfirmasi dulu
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Akhiri Sewa?"),
-        content: Text("Apakah Anda yakin ingin mengakhiri sewa untuk Kamar ${widget.kamar.nomorKamar}? Status kamar akan kembali menjadi 'Tersedia'."),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Batal")),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Ya, Akhiri"),
-          ),
-        ],
+Future<void> _akhiriKontrak() async {
+  // Gunakan context lokal untuk dialog
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (dialogCtx) => AlertDialog(
+      title: const Text("Akhiri Sewa?"),
+      content: Text("Apakah Anda yakin ingin mengakhiri sewa untuk Kamar ${widget.kamar.nomorKamar}? Status kamar akan kembali menjadi 'Tersedia'."),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogCtx, false),
+          child: const Text("Batal"),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          onPressed: () => Navigator.pop(dialogCtx, true),
+          child: const Text("Ya, Akhiri"),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm != true) return;
+
+  if (!mounted) return; // cek mounted sebelum setState
+  setState(() => _isLoading = true);
+
+  try {
+    final token = Provider.of<AuthProvider>(context, listen: false).token!;
+    await _apiService.updateKontrakStatus(token, widget.kamar.kontrakAktifId!, 'BERAKHIR');
+
+    if (!mounted) return; // cek mounted sebelum navigator/snackbar
+    Navigator.pop(context, true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Kontrak berhasil diakhiri."),
+        backgroundColor: Colors.green,
       ),
     );
-
-    if (confirm != true) return;
-
-    setState(() { _isLoading = true; });
-    try {
-      final token = Provider.of<AuthProvider>(context, listen: false).token!;
-      // Panggil API untuk ubah status kontrak jadi 'BERAKHIR'
-      await _apiService.updateKontrakStatus(token, widget.kamar.kontrakAktifId!, 'BERAKHIR');
-
-      if (!mounted) return;
-      Navigator.pop(context, true); // Kembali dengan sinyal 'true' (perlu refresh)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Kontrak berhasil diakhiri."), backgroundColor: Colors.green),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
-    } finally {
-      if (mounted) setState(() { _isLoading = false; });
-    }
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+  if (mounted) {
+    setState(() => _isLoading = false);
   }
-
+}
+}
+  
+  
   @override
   Widget build(BuildContext context) {
     final kamar = widget.kamar;
