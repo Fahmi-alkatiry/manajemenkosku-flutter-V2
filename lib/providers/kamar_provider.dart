@@ -107,8 +107,8 @@ class KamarProvider extends ChangeNotifier {
       final Map<String, dynamic> data = {
         'penyewaId': penyewaId,
         'kamarId': kamarId,
-        'tanggal_mulai_sewa': tanggalMulai.toIso8601String(), // Format ke ISO String
-        'tanggal_akhir_sewa': tanggalAkhir.toIso8601String(),
+        'tanggal_mulai_sewa': DateTime.utc(tanggalMulai.year, tanggalMulai.month, tanggalMulai.day).toIso8601String(),
+        'tanggal_akhir_sewa': DateTime.utc(tanggalAkhir.year, tanggalAkhir.month, tanggalAkhir.day).toIso8601String(),
         'harga_sewa_disepakati': hargaDisepakati,
       };
 
@@ -130,6 +130,47 @@ class KamarProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false; // Gagal
+    }
+  }
+
+
+  Future<bool> updateKamar(int kamarId, Map<String, dynamic> data) async {
+    if (_token == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final updatedKamar = await _apiService.updateKamar(_token!, kamarId, data);
+      // Update item di list lokal
+      final index = _kamarItems.indexWhere((k) => k.id == kamarId);
+      if (index != -1) {
+        _kamarItems[index] = updatedKamar;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Fungsi Hapus Kamar
+  Future<bool> deleteKamar(int kamarId) async {
+    if (_token == null) return false;
+    // Opsional: bisa tambah loading state khusus delete jika mau
+    try {
+      await _apiService.deleteKamar(_token!, kamarId);
+      // Hapus item dari list lokal
+      _kamarItems.removeWhere((k) => k.id == kamarId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 }

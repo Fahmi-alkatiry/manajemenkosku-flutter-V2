@@ -1,11 +1,11 @@
 // lib/screens/admin/admin_home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:kosku_app/screens/admin/admin_properti_page.dart';
-import 'package:kosku_app/screens/admin/admin_verifikasi_page.dart';
-import 'package:kosku_app/screens/admin/admin_penyewa_page.dart'; // <-- 1. IMPORT BARU
+import 'package:kosku_app/screens/admin/pages/admin_properti_page.dart';
+import 'package:kosku_app/screens/admin/pages/admin_verifikasi_page.dart';
+import 'package:kosku_app/screens/admin/pages/admin_penyewa_page.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/screens/profile_screen.dart';
-import 'package:kosku_app/screens/admin/admin_laporan_page.dart'; // <-- 1. IMPORT
-import 'package:kosku_app/screens/admin/admin_dashboard_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/admin/pages/admin_laporan_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/admin/pages/admin_dashboard_page.dart'; // <-- 1. IMPORT
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -14,7 +14,7 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  int _selectedIndex = 1; // Mulai dari Tab "Properti"
+  int _selectedIndex = 0; // Mulai dari Tab "Properti"
 
   static final List<Widget> _adminPages = <Widget>[
     // 0: Dashboard
@@ -31,6 +31,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     const AdminLaporanPage(), // <-- 2. GANTI PLACEHOLDER
     // 5: Profil
     const ProfileScreen(),
+
+    // 6: Placeholder
+    const ProfileScreen(),
   ];
 
   // Daftar judul untuk AppBar
@@ -41,6 +44,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     'Manajemen Penyewa', // <-- JUDUL BARU
     'Laporan',
     'Profil Saya',
+    
   ];
 
   void _onItemTapped(int index) {
@@ -87,6 +91,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             icon: Icon(Icons.person),
             label: 'Profil',
           ),
+          
+          
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,

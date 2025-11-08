@@ -1,8 +1,8 @@
 // lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // <-- IMPORT
+import 'package:image_picker/image_picker.dart';
 import 'package:kosku_app/providers/auth_provider.dart';
-import 'package:kosku_app/services/api_service.dart'; // <-- IMPORT
+import 'package:kosku_app/services/api_service.dart';
 import 'package:kosku_app/screens/edit_profile_page.dart';
 import 'package:kosku_app/screens/ganti_password_page.dart';
 import 'package:provider/provider.dart';
@@ -15,23 +15,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // Ganti IP ini sesuai dengan backend Anda
+  final String baseUrl = "http://192.168.100.140:5000";
+
   @override
   void initState() {
     super.initState();
-    // Panggil fetchMyProfile saat halaman dibuka agar data terisi
+    // Ambil data profil terbaru saat halaman dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthProvider>(context, listen: false).fetchMyProfile();
     });
   }
 
   // --- FUNGSI UPLOAD KTP SENDIRI ---
-  Future<void> _uploadMyKtp() async {
+  Future<void> _uploadMyKtp(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (!mounted) return; // Cek apakah widget masih hidup
-
-    if (image != null) {
+    if (image != null && mounted) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Mengupload KTP Anda...")));
@@ -47,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.green,
           ),
         );
-
+        // Refresh data profil
         Provider.of<AuthProvider>(context, listen: false).fetchMyProfile();
       } catch (e) {
         if (!mounted) return;
@@ -58,107 +59,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    debugPrint(authProvider.userProfile.toString());
-    // Base URL untuk menampilkan gambar KTP (jika sudah ada)
-    const String baseUrl = "http://192.168.100.140:5000";
-
-    // Tampilkan loading jika data profil belum siap
-    if (authProvider.isLoading && authProvider.userProfile == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    return Scaffold(
-      // ... (AppBar opsional, tergantung shell)
-      body: ListView(
-        children: [
-          // --- TAMPILAN INFO USER ---
-          if (authProvider.userProfile != null) ...[
-            const SizedBox(height: 20),
-            Center(
-              child: CircleAvatar(
-                radius: 40,
-                child: Text(
-                  authProvider.userProfile!.nama[0],
-                  style: const TextStyle(fontSize: 32),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: Text(
-                authProvider.userProfile!.nama,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Center(
-              child: Text(
-                authProvider.userProfile!.email,
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ),
-            const Divider(height: 30),
-          ],
-
-          // --- MENU ---
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text("Edit Data Profil"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (ctx) => const EditProfilePage()),
-              );
-            },
-          ),
-          // == MENU BARU: UPLOAD KTP ==
-          ListTile(
-            leading: const Icon(Icons.credit_card),
-            title: const Text("Upload / Lihat KTP Saya"),
-            onTap: () {
-              _showKtpDialog(
-                context,
-                authProvider.userProfile?.fotoKtp,
-                baseUrl,
-              );
-              debugPrint("$baseUrl, ${authProvider.userProfile?.fotoKtp}");
-            },
-          ),
-          // ===========================
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text("Ganti Password"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (ctx) => const GantiPasswordPage()),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text("Logout"),
-            onTap: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Dialog untuk melihat/upload KTP
-  void _showKtpDialog(
-    BuildContext context,
-    String? fotoKtpPath,
-    String baseUrl,
-  ) {
+  // --- DIALOG UNTUK UPLOAD/LIHAT KTP ---
+  void _showKtpDialog(BuildContext context, String? fotoKtpPath) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -168,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Container(
               height: 200,
-              width: double.maxFinite,
+              width: double.infinity,
               decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
               child: fotoKtpPath == null
                   ? const Center(child: Text("Belum ada KTP"))
@@ -182,8 +84,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pop(ctx); // Tutup dialog
-                _uploadMyKtp(); // Tidak perlu kirim context lagi
+                Navigator.pop(ctx); // Tutup dialog dulu
+                _uploadMyKtp(context); // Mulai proses upload
               },
               icon: const Icon(Icons.upload),
               label: const Text("Upload KTP Baru"),
@@ -196,6 +98,197 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text("Tutup"),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Gunakan Consumer agar UI otomatis update saat data profil dimuat
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Tampilkan loading jika data profil sedang dimuat
+        if (authProvider.isLoading && authProvider.userProfile == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Tampilkan info default jika userProfile masih null
+        final userNama = authProvider.userProfile?.nama ?? "Pengguna";
+        final userEmail =
+            authProvider.userProfile?.email ?? "email@loading.com";
+        final userInisial = userNama.isNotEmpty
+            ? userNama[0].toUpperCase()
+            : "?";
+
+        // ===================================
+        // ==     LOGIKA PADDING BARU       ==
+        // ===================================
+        // Tentukan padding berdasarkan peran
+        final EdgeInsets listPadding;
+        if (authProvider.isAdmin) {
+          // Padding untuk Admin (karena ada AppBar di AdminHomeScreen)
+          listPadding = const EdgeInsets.all(16);
+        } else {
+          // Padding untuk Penyewa (User)
+          listPadding = const EdgeInsets.fromLTRB(20, 60, 20, 40); 
+        }
+        // ===================================
+
+        // Hapus Scaffold dari sini
+        return ListView(
+          padding: listPadding, // <-- Gunakan padding dinamis
+          children: [
+            // Card di tengah (Data Dinamis)
+            Center(
+              child: Card(
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: double.infinity, 
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            userInisial, // INSIAL DINAMIS
+                            style: const TextStyle(
+                              fontSize: 40,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        userNama, // NAMA DINAMIS
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        userEmail, // EMAIL DINAMIS
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Menu Items (Tombol Fungsional)
+            _buildMenuItem(
+              context,
+              icon: Icons.person_outline,
+              title: "Edit Profil",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => const EditProfilePage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.lock_outline,
+              title: "Ganti Password",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => const GantiPasswordPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.credit_card_outlined,
+              title: "Upload KTP",
+              onTap: () {
+                _showKtpDialog(
+                  context,
+                  authProvider.userProfile?.fotoKtp, // Kirim path KTP
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Logout Button (Tombol Fungsional)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.logout, color: Colors.red),
+                label: const Text(
+                  "Logout",
+                  style: TextStyle(color: Colors.red),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () {
+                  // Panggil fungsi logout dari provider
+                  Provider.of<AuthProvider>(context, listen: false).logout();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Widget Helper Anda (sudah sangat bagus)
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: Colors.blue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -18,7 +18,7 @@ class _PenyewaHomeScreenState extends State<PenyewaHomeScreen> {
   // Daftar halaman/layar untuk Penyewa
   static const List<Widget> _penyewaPages = <Widget>[
     PenyewaDashboardPage(), // 0: Halaman Home (Tagihan/Riwayat)
-    ProfileScreen(),        // 1: Halaman Profil
+    ProfileScreen(), // 1: Halaman Profil
   ];
 
   // Daftar judul untuk AppBar
@@ -36,31 +36,26 @@ class _PenyewaHomeScreenState extends State<PenyewaHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // Judul AppBar akan berubah sesuai tab yang dipilih
-        title: Text(_pageTitles[_selectedIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
-          ),
-        ],
-      ),
-      body: _penyewaPages.elementAt(_selectedIndex), // Tampilkan halaman yang dipilih
-      
+      // appBar: AppBar(
+      //   // Judul AppBar akan berubah sesuai tab yang dipilih
+      //   title: Text(_pageTitles[_selectedIndex]),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.logout),
+      //       onPressed: () {
+      //         Provider.of<AuthProvider>(context, listen: false).logout();
+      //       },
+      //     ),
+      //   ],
+      // ),
+      body: _penyewaPages.elementAt(
+        _selectedIndex,
+      ), // Tampilkan halaman yang dipilih
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,

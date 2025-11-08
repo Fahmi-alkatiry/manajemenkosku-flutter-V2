@@ -1,3 +1,4 @@
+// lib/services/api_service.dart
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:kosku_app/models/properti.dart';
@@ -13,6 +14,7 @@ import 'package:kosku_app/models/dashboard_stats.dart'; // <-- IMPORT BARU
 class ApiService {
   // GUNAKAN IP YANG SESUAI DARI LANGKAH 1
   // 192.168.100.140
+  // 192.168.2.119
   //192.168.1.21
   final String _baseUrl = "http://192.168.100.140:5000/api";
 
@@ -495,6 +497,74 @@ Future<void> uploadKtp(String token, XFile imageFile, {int? targetUserId}) async
     if (response.statusCode != 200) {
       final respBody = await response.stream.bytesToString();
       throw Exception('Gagal upload KTP: $respBody');
+    }
+  }
+
+  Future<Kamar> updateKamar(String token, int kamarId, Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/kamar/$kamarId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return Kamar.fromJson(jsonDecode(response.body));
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal update kamar');
+    }
+  }
+
+  // Hapus kamar
+  Future<void> deleteKamar(String token, int kamarId) async {
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/kamar/$kamarId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal menghapus kamar');
+    }
+  }
+
+
+  Future<Properti> updateProperti(String token, int propertiId, Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/properti/$propertiId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      return Properti.fromJson(jsonDecode(response.body));
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Gagal update properti');
+    }
+  }
+
+  // Hapus Properti
+  Future<void> deleteProperti(String token, int propertiId) async {
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/properti/$propertiId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final error = jsonDecode(response.body);
+      // Error umum: tidak bisa hapus properti yg masih punya kamar/kontrak
+      throw Exception(error['message'] ?? 'Gagal menghapus properti');
     }
   }
 }

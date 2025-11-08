@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/auth_provider.dart';
 import 'package:kosku_app/providers/properti_provider.dart'; // <-- 1. IMPORT BARU
 import 'package:kosku_app/screens/login_screen.dart';
-import 'package:kosku_app/screens/admin/admin_home_screen.dart';
+import 'package:kosku_app/screens/admin/pages/admin_home_screen.dart';
 import 'package:kosku_app/screens/penyewa/penyewa_home_screen.dart';
 import 'package:kosku_app/providers/kamar_provider.dart'; // <-- 1. IMPORT BARU
 import 'package:provider/provider.dart';

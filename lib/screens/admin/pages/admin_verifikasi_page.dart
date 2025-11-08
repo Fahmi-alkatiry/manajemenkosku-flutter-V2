@@ -1,10 +1,10 @@
 // lib/screens/admin/admin_verifikasi_page.dart
 import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/pembayaran_provider.dart';
-import 'package:kosku_app/screens/admin/tambah_tagihan_page.dart';
+import 'package:kosku_app/screens/admin/forms/tambah_tagihan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // Untuk format Rupiah
-import 'package:kosku_app/screens/admin/detail_verifikasi_page.dart'; // <-- 1. IMPORT
+import 'package:kosku_app/screens/admin/details/detail_verifikasi_page.dart'; // <-- 1. IMPORT
 
 class AdminVerifikasiPage extends StatefulWidget {
   const AdminVerifikasiPage({super.key});

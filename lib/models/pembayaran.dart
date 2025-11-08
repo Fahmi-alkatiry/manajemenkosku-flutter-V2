@@ -7,12 +7,14 @@ class Pembayaran {
   final String status; // Pending, Lunas, Ditolak
   final String? buktiPembayaran;
   final int kontrakId;
+  final DateTime? tanggalBayar;
 
   // --- TAMBAHKAN FIELD BARU ---
   // Kita asumsikan backend akan mengirim data ini
   // untuk mempermudah tampilan di UI
   final String? penyewaNama;
   final String? kamarNomor;
+  final DateTime? tanggalJatuhTempo;
   // -----------------------------
 
   Pembayaran({
@@ -26,6 +28,8 @@ class Pembayaran {
     // --- TAMBAHKAN DI CONSTRUCTOR ---
     this.penyewaNama,
     this.kamarNomor,
+    this.tanggalBayar,
+    this.tanggalJatuhTempo,
   });
 
   factory Pembayaran.fromJson(Map<String, dynamic> json) {
@@ -37,12 +41,20 @@ class Pembayaran {
       status: json['status'],
       buktiPembayaran: json['bukti_pembayaran'],
       kontrakId: json['kontrakId'],
-      
+
       // --- AMBIL DATA DARI RELASI (NESTED JSON) ---
       // (Backend Anda harus di-update untuk mengirim 'kontrak.penyewa.nama'
       //  dan 'kontrak.kamar.nomor_kamar' saat memanggil API pembayaran)
       penyewaNama: json['kontrak']?['penyewa']?['nama'] ?? 'N/A',
       kamarNomor: json['kontrak']?['kamar']?['nomor_kamar'] ?? 'N/A',
+
+      tanggalBayar: json['tanggal_bayar'] != null
+          ? DateTime.parse(json['tanggal_bayar'])
+          : null,
+
+      tanggalJatuhTempo: json['tanggal_jatuh_tempo'] != null
+          ? DateTime.parse(json['tanggal_jatuh_tempo'])
+          : null,
     );
   }
 }

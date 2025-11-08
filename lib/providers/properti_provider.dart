@@ -68,4 +68,44 @@ class PropertiProvider extends ChangeNotifier {
       return false; // Gagal
     }
   }
+
+  // Fungsi Update
+  Future<bool> updateProperti(int propertiId, String nama, String alamat, String? deskripsi) async {
+    if (_token == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = {'nama_properti': nama, 'alamat': alamat, 'deskripsi': deskripsi};
+      final updatedProperti = await _apiService.updateProperti(_token!, propertiId, data);
+      
+      final index = _items.indexWhere((p) => p.id == propertiId);
+      if (index != -1) {
+        _items[index] = updatedProperti;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Fungsi Delete
+  Future<bool> deleteProperti(int propertiId) async {
+    if (_token == null) return false;
+    try {
+      await _apiService.deleteProperti(_token!, propertiId);
+      _items.removeWhere((p) => p.id == propertiId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }

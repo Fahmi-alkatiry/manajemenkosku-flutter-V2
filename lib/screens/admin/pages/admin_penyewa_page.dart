@@ -1,9 +1,9 @@
 // lib/screens/admin/admin_penyewa_page.dart
 import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/user_provider.dart';
-import 'package:kosku_app/screens/admin/tambah_penyewa_page.dart';
+import 'package:kosku_app/screens/admin/forms/tambah_penyewa_page.dart';
 import 'package:provider/provider.dart';
-import 'package:kosku_app/screens/admin/detail_penyewa_page.dart'; // <-- 1. IMPORT BARU
+import 'package:kosku_app/screens/admin/details/detail_penyewa_page.dart'; // <-- 1. IMPORT BARU
 
 class AdminPenyewaPage extends StatefulWidget {
   const AdminPenyewaPage({super.key});

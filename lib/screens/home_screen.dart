@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosku_app/providers/auth_provider.dart';
 import 'package:kosku_app/providers/properti_provider.dart';
-import 'package:kosku_app/screens/tambah_properti_screen.dart'; // Impor layar tambah
+import 'package:kosku_app/screens/admin/forms/tambah_properti_screen.dart'; // Impor layar tambah
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
